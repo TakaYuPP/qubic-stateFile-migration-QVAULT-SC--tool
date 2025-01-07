@@ -179,7 +179,7 @@ OldState readOldState(const std::string& filename) {
 
 // Function to write new state to a file
 void writeNewState(const std::string& filename) {
-    std::ofstream outfile(filename);
+    std::ofstream outfile(filename, std::ios::binary);
     if (!outfile) {
         throw std::runtime_error("Failed to open the new state file.");
     }
