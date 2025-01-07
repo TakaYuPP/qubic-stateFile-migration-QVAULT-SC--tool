@@ -10,4 +10,4 @@ SET(HEADER_FILES
 	keyUtils.h
 	m256.h
 )
-ADD_EXECUTABLE(migration_tool ${FILES})
+ADD_EXECUTABLE(qubic-stateFile-migration-QVAULT-SC--tool ${FILES})
