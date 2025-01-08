@@ -205,10 +205,7 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&unbannedAddress1), sizeof(unbannedAddress1));
     outfile.write(reinterpret_cast<const char*>(&unbannedAddress2), sizeof(unbannedAddress2));
     outfile.write(reinterpret_cast<const char*>(&unbannedAddress3), sizeof(unbannedAddress3));
-    for(uint32_t i = 0 ; i < QVAULT_MAX_NUMBER_OF_BANNED_ADDRESSES; i++)
-    {
-        outfile.write(reinterpret_cast<const char*>(&bannedAddress.get(i)), sizeof(bannedAddress.get(i)));
-    }
+    outfile.write(reinterpret_cast<const char*>(&bannedAddress), sizeof(bannedAddress));
     outfile.write(reinterpret_cast<const char*>(&numberOfBannedAddress), sizeof(numberOfBannedAddress));
     outfile.write(reinterpret_cast<const char*>(&shareholderDividend), sizeof(shareholderDividend));
     outfile.write(reinterpret_cast<const char*>(&QCAPHolderPermille), sizeof(QCAPHolderPermille));
