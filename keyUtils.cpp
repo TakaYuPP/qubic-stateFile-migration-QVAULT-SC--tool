@@ -121,7 +121,7 @@ void getDigestFromSiblings(
     const uint8_t (*siblings)[hashByteLen],
     uint8_t *output)
     {
-    const uint32_t hash_byte_lenx2 = (hashByteLen << 1);
+    const unsigned int hash_byte_lenx2 = (hashByteLen << 1);
     std::vector<uint8_t> pair_digests(hash_byte_lenx2);
     std::vector<uint8_t> digest(hashByteLen);
 
