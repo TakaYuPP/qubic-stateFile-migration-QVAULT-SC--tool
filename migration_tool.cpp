@@ -785,6 +785,7 @@ void HashSet<KeyT, L, HashFunc>::reset()
     setMem(this, sizeof(*this), 0);
 }
 
+#pragma pack(push, 1)
 struct stakingInfo
 {
     id stakerAddress;
@@ -955,7 +956,7 @@ unsigned int transferRightsFee;
 unsigned int numberOfMuslimShare;
 int numberOfMuslim;
 unsigned int quorumPercent;
-
+#pragma pack(pop)
 // Function to write new state to a file
 void writeNewState(const std::string& filename) {
     std::ofstream outfile(filename, std::ios::binary);
@@ -1041,7 +1042,7 @@ void writeNewState(const std::string& filename) {
 int main() {
     try {
         // File paths
-        const std::string newStateFile = "contract0010.163";
+        const std::string newStateFile = "contract0010.164";
 
         // Write the new state to a file
         writeNewState(newStateFile);
