@@ -791,10 +791,10 @@ struct stakingInfo
     id stakerAddress;
     unsigned int amount;
 };
-
+#pragma pack(pop)
 stakingInfo staker[1048576];
 stakingInfo votingPower[1048576];
-
+#pragma pack(push, 1)
 struct GPInfo                   // General proposal
 {
     id proposer;
@@ -805,9 +805,9 @@ struct GPInfo                   // General proposal
     unsigned int currentQuorumPercent;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-
+#pragma pack(pop)
 GPInfo GP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct QCPInfo                   // Quorum change proposal
 {
     id proposer;
@@ -819,9 +819,9 @@ struct QCPInfo                   // Quorum change proposal
     unsigned int newQuorumPercent;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-
+#pragma pack(pop)
 QCPInfo QCP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct IPOPInfo         // IPO participation
 {
     id proposer;
@@ -835,9 +835,9 @@ struct IPOPInfo         // IPO participation
     unsigned int currentQuorumPercent;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient invest funds.
 };
-
+#pragma pack(pop)
 IPOPInfo IPOP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct QEarnPInfo       // Qearn participation proposal
 {
     id proposer;
@@ -851,9 +851,9 @@ struct QEarnPInfo       // Qearn participation proposal
     uint8_t numberOfEpoch;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds.
 };
-
+#pragma pack(pop)
 QEarnPInfo QEarnP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct FundPInfo            // Fundraising proposal
 {
     id proposer;
@@ -867,9 +867,9 @@ struct FundPInfo            // Fundraising proposal
     unsigned int currentQuorumPercent;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-
+#pragma pack(pop)
 FundPInfo FundP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct MKTPInfo                 //  Marketplace proposal
 {
     id proposer;
@@ -885,9 +885,9 @@ struct MKTPInfo                 //  Marketplace proposal
     unsigned int amountOfShare;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds. 4 is the insufficient Qcap.
 };
-
+#pragma pack(pop)
 MKTPInfo MKTP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct AlloPInfo
 {
     id proposer;
@@ -902,9 +902,9 @@ struct AlloPInfo
     unsigned int burnQcap;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-
+#pragma pack(pop)
 AlloPInfo AlloP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-
+#pragma pack(push, 1)
 struct MSPInfo
 {
     id proposer;
@@ -916,19 +916,20 @@ struct MSPInfo
     unsigned int currentQuorumPercent;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-
+#pragma pack(pop)
 MSPInfo MSP[1024];
 
 id QCAP_ISSUER;
 id reinvestingAddress;
 id adminAddress;
 HashSet<id, 1048576> muslim;
-
+#pragma pack(push, 1)
 struct voteStatusInfo
 {
     unsigned int proposalId;
     uint8_t proposalType;
 };
+#pragma pack(pop)
 HashMap<id, Array<voteStatusInfo, 16>, 1048576> vote;
 HashMap<id, uint8_t, 1048576> countOfVote;
 
@@ -956,7 +957,7 @@ unsigned int transferRightsFee;
 unsigned int numberOfMuslimShare;
 int numberOfMuslim;
 unsigned int quorumPercent;
-#pragma pack(pop)
+
 // Function to write new state to a file
 void writeNewState(const std::string& filename) {
     std::ofstream outfile(filename, std::ios::binary);
@@ -1017,6 +1018,7 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&reinvestingPermille), sizeof(reinvestingPermille));
     outfile.write(reinterpret_cast<const char*>(&devPermille), sizeof(devPermille));
     outfile.write(reinterpret_cast<const char*>(&burnPermille), sizeof(burnPermille));
+    outfile.write(reinterpret_cast<const char*>(&qcapBurnPermille), sizeof(qcapBurnPermille));
     outfile.write(reinterpret_cast<const char*>(&totalQcapBurntAmount), sizeof(totalQcapBurntAmount));
     outfile.write(reinterpret_cast<const char*>(&numberOfStaker), sizeof(numberOfStaker));
     outfile.write(reinterpret_cast<const char*>(&numberOfVotingPower), sizeof(numberOfVotingPower));
