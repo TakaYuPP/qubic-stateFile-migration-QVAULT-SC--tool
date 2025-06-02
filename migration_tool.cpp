@@ -803,6 +803,7 @@ struct GPInfo                   // General proposal
     unsigned int numberOfNo;
     unsigned int proposedEpoch;
     unsigned int currentQuorumPercent;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 #pragma pack(pop)
@@ -817,6 +818,7 @@ struct QCPInfo                   // Quorum change proposal
     unsigned int proposedEpoch;
     unsigned int currentQuorumPercent;
     unsigned int newQuorumPercent;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 #pragma pack(pop)
@@ -833,6 +835,7 @@ struct IPOPInfo         // IPO participation
     unsigned int proposedEpoch;
     unsigned int ipoContractIndex;
     unsigned int currentQuorumPercent;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient invest funds.
 };
 #pragma pack(pop)
@@ -848,6 +851,7 @@ struct QEarnPInfo       // Qearn participation proposal
     unsigned int numberOfNo;
     unsigned int proposedEpoch;
     unsigned int currentQuorumPercent;
+    Array<uint8_t, 256> url;
     uint8_t numberOfEpoch;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds.
 };
@@ -865,6 +869,7 @@ struct FundPInfo            // Fundraising proposal
     unsigned int restSaleAmount;
     unsigned int proposedEpoch;
     unsigned int currentQuorumPercent;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 #pragma pack(pop)
@@ -883,6 +888,7 @@ struct MKTPInfo                 //  Marketplace proposal
     unsigned int proposedEpoch;
     unsigned int shareIndex;
     unsigned int amountOfShare;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds. 4 is the insufficient Qcap.
 };
 #pragma pack(pop)
@@ -900,6 +906,7 @@ struct AlloPInfo
     unsigned int distributed;
     unsigned int team;
     unsigned int burnQcap;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 #pragma pack(pop)
@@ -914,6 +921,7 @@ struct MSPInfo
     unsigned int proposedEpoch;
     unsigned int muslimShareIndex;
     unsigned int currentQuorumPercent;
+    Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 #pragma pack(pop)
