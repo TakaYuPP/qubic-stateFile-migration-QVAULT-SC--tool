@@ -965,13 +965,13 @@ void writeNewState(const std::string& filename) {
 
     outfile.write(reinterpret_cast<const char*>(&staker), sizeof(staker));
     outfile.write(reinterpret_cast<const char*>(&votingPower), sizeof(votingPower));
-    outfile.write(reinterpret_cast<const char*>(&GP), sizeof(GP));
-    outfile.write(reinterpret_cast<const char*>(&QCP), sizeof(QCP));
-    outfile.write(reinterpret_cast<const char*>(&IPOP), sizeof(IPOP));
-    outfile.write(reinterpret_cast<const char*>(&QEarnP), sizeof(QEarnP));
-    outfile.write(reinterpret_cast<const char*>(&FundP), sizeof(FundP));
-    outfile.write(reinterpret_cast<const char*>(&MKTP), sizeof(MKTP));
-    outfile.write(reinterpret_cast<const char*>(&AlloP), sizeof(AlloP));
+    // outfile.write(reinterpret_cast<const char*>(&GP), sizeof(GP));
+    // outfile.write(reinterpret_cast<const char*>(&QCP), sizeof(QCP));
+    // outfile.write(reinterpret_cast<const char*>(&IPOP), sizeof(IPOP));
+    // outfile.write(reinterpret_cast<const char*>(&QEarnP), sizeof(QEarnP));
+    // outfile.write(reinterpret_cast<const char*>(&FundP), sizeof(FundP));
+    // outfile.write(reinterpret_cast<const char*>(&MKTP), sizeof(MKTP));
+    // outfile.write(reinterpret_cast<const char*>(&AlloP), sizeof(AlloP));
     outfile.write(reinterpret_cast<const char*>(&QCAP_ISSUER), sizeof(QCAP_ISSUER));
     outfile.write(reinterpret_cast<const char*>(&adminAddress), sizeof(adminAddress));
     outfile.write(reinterpret_cast<const char*>(&vote), sizeof(vote));
