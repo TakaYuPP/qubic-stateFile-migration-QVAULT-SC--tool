@@ -913,7 +913,6 @@ struct AlloPInfo
 AlloPInfo AlloP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
 
 id QCAP_ISSUER;
-id reinvestingAddress;
 id adminAddress;
 #pragma pack(push, 1)
 struct voteStatusInfo
@@ -974,7 +973,6 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&MKTP), sizeof(MKTP));
     outfile.write(reinterpret_cast<const char*>(&AlloP), sizeof(AlloP));
     outfile.write(reinterpret_cast<const char*>(&QCAP_ISSUER), sizeof(QCAP_ISSUER));
-    outfile.write(reinterpret_cast<const char*>(&reinvestingAddress), sizeof(reinvestingAddress));
     outfile.write(reinterpret_cast<const char*>(&adminAddress), sizeof(adminAddress));
     outfile.write(reinterpret_cast<const char*>(&vote), sizeof(vote));
     outfile.write(reinterpret_cast<const char*>(&countOfVote), sizeof(countOfVote));
