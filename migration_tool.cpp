@@ -911,26 +911,10 @@ struct AlloPInfo
 };
 #pragma pack(pop)
 AlloPInfo AlloP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
-struct MSPInfo
-{
-    id proposer;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int proposedEpoch;
-    unsigned int muslimShareIndex;
-    unsigned int currentQuorumPercent;
-    Array<uint8_t, 256> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
-};
-#pragma pack(pop)
-MSPInfo MSP[1024];
 
 id QCAP_ISSUER;
 id reinvestingAddress;
 id adminAddress;
-HashSet<id, 1048576> muslim;
 #pragma pack(push, 1)
 struct voteStatusInfo
 {
@@ -941,14 +925,12 @@ struct voteStatusInfo
 HashMap<id, Array<voteStatusInfo, 16>, 1048576> vote;
 HashMap<id, uint8_t, 1048576> countOfVote;
 
-uint64_t proposalCreateFund, reinvestingFund, totalNotMSRevenue, totalMuslimRevenue, fundForBurn, totalHistoryRevenue, rasiedFundByQcap, lastRoundPriceOfQcap, revenueByQearn;
+uint64_t proposalCreateFund, reinvestingFund, totalEpochRevenue, fundForBurn, totalHistoryRevenue, rasiedFundByQcap, lastRoundPriceOfQcap, revenueByQearn;
 Array<uint64_t, 65536> revenueInQcapPerEpoch;
 Array<uint64_t, 65536> revenueForOneQcapPerEpoch;
-Array<uint64_t, 65536> revenueForOneMuslimPerEpoch;
 Array<uint64_t, 65536> revenueForOneQvaultPerEpoch;
 Array<uint64_t, 65536> revenueForReinvestPerEpoch;
 Array<uint64_t, 1024> revenuePerShare;
-Array<unsigned int, 64> muslimShares;
 Array<unsigned int, 65536> burntQcapAmPerEpoch;
 unsigned int totalVotingPower, totalStakedQcapAmount, qcapSoldAmount;
 unsigned int shareholderDividend, QCAPHolderPermille, reinvestingPermille, devPermille, burnPermille, qcapBurnPermille, totalQcapBurntAmount;
@@ -960,10 +942,7 @@ unsigned int numberOfQEarnP;
 unsigned int numberOfFundP;
 unsigned int numberOfMKTP;
 unsigned int numberOfAlloP;
-unsigned int numberOfMSP;
 unsigned int transferRightsFee;
-unsigned int numberOfMuslimShare;
-int numberOfMuslim;
 unsigned int quorumPercent;
 
 // Function to write new state to a file
@@ -994,17 +973,14 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&FundP), sizeof(FundP));
     outfile.write(reinterpret_cast<const char*>(&MKTP), sizeof(MKTP));
     outfile.write(reinterpret_cast<const char*>(&AlloP), sizeof(AlloP));
-    outfile.write(reinterpret_cast<const char*>(&MSP), sizeof(MSP));
     outfile.write(reinterpret_cast<const char*>(&QCAP_ISSUER), sizeof(QCAP_ISSUER));
     outfile.write(reinterpret_cast<const char*>(&reinvestingAddress), sizeof(reinvestingAddress));
     outfile.write(reinterpret_cast<const char*>(&adminAddress), sizeof(adminAddress));
-    outfile.write(reinterpret_cast<const char*>(&muslim), sizeof(muslim));
     outfile.write(reinterpret_cast<const char*>(&vote), sizeof(vote));
     outfile.write(reinterpret_cast<const char*>(&countOfVote), sizeof(countOfVote));
     outfile.write(reinterpret_cast<const char*>(&proposalCreateFund), sizeof(proposalCreateFund));
     outfile.write(reinterpret_cast<const char*>(&reinvestingFund), sizeof(reinvestingFund));
-    outfile.write(reinterpret_cast<const char*>(&totalNotMSRevenue), sizeof(totalNotMSRevenue));
-    outfile.write(reinterpret_cast<const char*>(&totalMuslimRevenue), sizeof(totalMuslimRevenue));
+    outfile.write(reinterpret_cast<const char*>(&totalEpochRevenue), sizeof(totalEpochRevenue));
     outfile.write(reinterpret_cast<const char*>(&fundForBurn), sizeof(fundForBurn));
     outfile.write(reinterpret_cast<const char*>(&totalHistoryRevenue), sizeof(totalHistoryRevenue));
     outfile.write(reinterpret_cast<const char*>(&rasiedFundByQcap), sizeof(rasiedFundByQcap));
@@ -1012,11 +988,9 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&revenueByQearn), sizeof(revenueByQearn));
     outfile.write(reinterpret_cast<const char*>(&revenueInQcapPerEpoch), sizeof(revenueInQcapPerEpoch));
     outfile.write(reinterpret_cast<const char*>(&revenueForOneQcapPerEpoch), sizeof(revenueForOneQcapPerEpoch));
-    outfile.write(reinterpret_cast<const char*>(&revenueForOneMuslimPerEpoch), sizeof(revenueForOneMuslimPerEpoch));
     outfile.write(reinterpret_cast<const char*>(&revenueForOneQvaultPerEpoch), sizeof(revenueForOneQvaultPerEpoch));
     outfile.write(reinterpret_cast<const char*>(&revenueForReinvestPerEpoch), sizeof(revenueForReinvestPerEpoch));
     outfile.write(reinterpret_cast<const char*>(&revenuePerShare), sizeof(revenuePerShare));
-    outfile.write(reinterpret_cast<const char*>(&muslimShares), sizeof(muslimShares));
     outfile.write(reinterpret_cast<const char*>(&burntQcapAmPerEpoch), sizeof(burntQcapAmPerEpoch));
     outfile.write(reinterpret_cast<const char*>(&totalVotingPower), sizeof(totalVotingPower));
     outfile.write(reinterpret_cast<const char*>(&totalStakedQcapAmount), sizeof(totalStakedQcapAmount));
@@ -1037,10 +1011,7 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&numberOfFundP), sizeof(numberOfFundP));
     outfile.write(reinterpret_cast<const char*>(&numberOfMKTP), sizeof(numberOfMKTP));
     outfile.write(reinterpret_cast<const char*>(&numberOfAlloP), sizeof(numberOfAlloP));
-    outfile.write(reinterpret_cast<const char*>(&numberOfMSP), sizeof(numberOfMSP));
     outfile.write(reinterpret_cast<const char*>(&transferRightsFee), sizeof(transferRightsFee));
-    outfile.write(reinterpret_cast<const char*>(&numberOfMuslimShare), sizeof(numberOfMuslimShare));
-    outfile.write(reinterpret_cast<const char*>(&numberOfMuslim), sizeof(numberOfMuslim));
     outfile.write(reinterpret_cast<const char*>(&quorumPercent), sizeof(quorumPercent));
 
     if (!outfile) {
