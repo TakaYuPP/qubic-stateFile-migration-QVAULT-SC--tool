@@ -785,16 +785,16 @@ void HashSet<KeyT, L, HashFunc>::reset()
     setMem(this, sizeof(*this), 0);
 }
 
-#pragma pack(push, 1)
+
 struct stakingInfo
 {
     id stakerAddress;
     unsigned int amount;
 };
-#pragma pack(pop)
+
 stakingInfo staker[1048576];
 stakingInfo votingPower[1048576];
-#pragma pack(push, 1)
+
 struct GPInfo                   // General proposal
 {
     id proposer;
@@ -806,9 +806,9 @@ struct GPInfo                   // General proposal
     Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-#pragma pack(pop)
+
 GPInfo GP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
+
 struct QCPInfo                   // Quorum change proposal
 {
     id proposer;
@@ -821,9 +821,9 @@ struct QCPInfo                   // Quorum change proposal
     Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-#pragma pack(pop)
+
 QCPInfo QCP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
+
 struct IPOPInfo         // IPO participation
 {
     id proposer;
@@ -838,9 +838,9 @@ struct IPOPInfo         // IPO participation
     Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient invest funds.
 };
-#pragma pack(pop)
+
 IPOPInfo IPOP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
+
 struct QEarnPInfo       // Qearn participation proposal
 {
     id proposer;
@@ -855,9 +855,9 @@ struct QEarnPInfo       // Qearn participation proposal
     uint8_t numberOfEpoch;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds.
 };
-#pragma pack(pop)
+
 QEarnPInfo QEarnP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
+
 struct FundPInfo            // Fundraising proposal
 {
     id proposer;
@@ -872,9 +872,9 @@ struct FundPInfo            // Fundraising proposal
     Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-#pragma pack(pop)
+
 FundPInfo FundP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
+
 struct MKTPInfo                 //  Marketplace proposal
 {
     id proposer;
@@ -891,9 +891,9 @@ struct MKTPInfo                 //  Marketplace proposal
     Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds. 4 is the insufficient Qcap.
 };
-#pragma pack(pop)
+
 MKTPInfo MKTP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
-#pragma pack(push, 1)
+
 struct AlloPInfo
 {
     id proposer;
@@ -909,18 +909,17 @@ struct AlloPInfo
     Array<uint8_t, 256> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
-#pragma pack(pop)
+
 AlloPInfo AlloP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
 
 id QCAP_ISSUER;
 id adminAddress;
-#pragma pack(push, 1)
+
 struct voteStatusInfo
 {
     unsigned int proposalId;
     uint8_t proposalType;
 };
-#pragma pack(pop)
 HashMap<id, Array<voteStatusInfo, 16>, 1048576> vote;
 HashMap<id, uint8_t, 1048576> countOfVote;
 
