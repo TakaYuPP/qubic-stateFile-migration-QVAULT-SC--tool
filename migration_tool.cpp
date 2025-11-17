@@ -962,7 +962,7 @@ void writeNewState(const std::string& filename) {
     quorumPercent = 670;
     qcapBurnPermille = 0;
     burnPermille = 0;
-    QCAPHolderPermille = 500;
+    QCAPHolderPermille = 520;
     reinvestingPermille = 450;
     shareholderDividend = 30;
 
