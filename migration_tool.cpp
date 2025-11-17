@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstdint>
 #include <unordered_map>
 #include "./m256.h"
 #include "keyUtils.h"
@@ -35,6 +36,12 @@
 
 typedef m256i id;
 constexpr unsigned int QVAULT_MAX_NUMBER_OF_PROPOSAL = 65536;
+constexpr uint64_t QVAULT_X_MULTIPLIER = 1048576;  // 2^20
+constexpr uint64_t QVAULT_MAX_URLS_COUNT = 256;
+constexpr uint64_t QVAULT_MAX_USER_VOTES = 16;
+
+// Define bit type (typically 1 byte in C++)
+typedef bool bit;
 
 template <typename T, uint64_t L>
 struct Array
@@ -789,139 +796,138 @@ void HashSet<KeyT, L, HashFunc>::reset()
 struct stakingInfo
 {
     id stakerAddress;
-    unsigned int amount;
+    uint32_t amount;
 };
 
-stakingInfo staker[1048576];
-stakingInfo votingPower[1048576];
+Array<stakingInfo, QVAULT_X_MULTIPLIER> staker;
+Array<stakingInfo, QVAULT_X_MULTIPLIER> votingPower;
 
 struct GPInfo                   // General proposal
 {
     id proposer;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int proposedEpoch;
-    unsigned int currentQuorumPercent;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t proposedEpoch;
+    uint32_t currentQuorumPercent;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 
-GPInfo GP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<GPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> GP;
 
 struct QCPInfo                   // Quorum change proposal
 {
     id proposer;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int proposedEpoch;
-    unsigned int currentQuorumPercent;
-    unsigned int newQuorumPercent;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t proposedEpoch;
+    uint32_t currentQuorumPercent;
+    uint32_t newQuorumPercent;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 
-QCPInfo QCP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<QCPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> QCP;
 
 struct IPOPInfo         // IPO participation
 {
     id proposer;
     uint64_t totalWeight;
     uint64_t assignedFund;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int proposedEpoch;
-    unsigned int ipoContractIndex;
-    unsigned int currentQuorumPercent;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t proposedEpoch;
+    uint32_t ipoContractIndex;
+    uint32_t currentQuorumPercent;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient invest funds.
 };
 
-IPOPInfo IPOP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<IPOPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> IPOP;
 
 struct QEarnPInfo       // Qearn participation proposal
 {
     id proposer;
     uint64_t amountOfInvestPerEpoch;
     uint64_t assignedFundPerEpoch;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int proposedEpoch;
-    unsigned int currentQuorumPercent;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t proposedEpoch;
+    uint32_t currentQuorumPercent;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t numberOfEpoch;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds.
 };
 
-QEarnPInfo QEarnP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<QEarnPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> QEarnP;
 
 struct FundPInfo            // Fundraising proposal
 {
     id proposer;
     uint64_t pricePerOneQcap;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int amountOfQcap;
-    unsigned int restSaleAmount;
-    unsigned int proposedEpoch;
-    unsigned int currentQuorumPercent;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t amountOfQcap;
+    uint32_t restSaleAmount;
+    uint32_t proposedEpoch;
+    uint32_t currentQuorumPercent;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 
-FundPInfo FundP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<FundPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> FundP;
 
 struct MKTPInfo                 //  Marketplace proposal
 {
     id proposer;
     uint64_t amountOfQubic;
     uint64_t shareName;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int amountOfQcap;
-    unsigned int currentQuorumPercent;
-    unsigned int proposedEpoch;
-    unsigned int shareIndex;
-    unsigned int amountOfShare;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t amountOfQcap;
+    uint32_t currentQuorumPercent;
+    uint32_t proposedEpoch;
+    uint32_t shareIndex;
+    uint32_t amountOfShare;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds. 4 is the insufficient Qcap.
 };
 
-MKTPInfo MKTP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<MKTPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> MKTP;
 
 struct AlloPInfo
 {
     id proposer;
-    unsigned int currentTotalVotingPower;
-    unsigned int numberOfYes;
-    unsigned int numberOfNo;
-    unsigned int proposedEpoch;
-    unsigned int currentQuorumPercent;
-    unsigned int reinvested;
-    unsigned int distributed;
-    unsigned int team;
-    unsigned int burnQcap;
-    Array<uint8_t, 256> url;
+    uint32_t currentTotalVotingPower;
+    uint32_t numberOfYes;
+    uint32_t numberOfNo;
+    uint32_t proposedEpoch;
+    uint32_t currentQuorumPercent;
+    uint32_t reinvested;
+    uint32_t distributed;
+    uint32_t burnQcap;
+    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
     uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
 };
 
-AlloPInfo AlloP[QVAULT_MAX_NUMBER_OF_PROPOSAL];
+Array<AlloPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> AlloP;
 
 id QCAP_ISSUER;
-id adminAddress;
 
 struct voteStatusInfo
 {
-    unsigned int proposalId;
+    uint32_t proposalId;
     uint8_t proposalType;
+    bit decision;
 };
-HashMap<id, Array<voteStatusInfo, 16>, 1048576> vote;
-HashMap<id, uint8_t, 1048576> countOfVote;
+HashMap<id, Array<voteStatusInfo, QVAULT_MAX_USER_VOTES>, QVAULT_X_MULTIPLIER> vote;
+HashMap<id, uint8_t, QVAULT_X_MULTIPLIER> countOfVote;
 
 uint64_t proposalCreateFund, reinvestingFund, totalEpochRevenue, fundForBurn, totalHistoryRevenue, rasiedFundByQcap, lastRoundPriceOfQcap, revenueByQearn;
 Array<uint64_t, 65536> revenueInQcapPerEpoch;
@@ -929,19 +935,19 @@ Array<uint64_t, 65536> revenueForOneQcapPerEpoch;
 Array<uint64_t, 65536> revenueForOneQvaultPerEpoch;
 Array<uint64_t, 65536> revenueForReinvestPerEpoch;
 Array<uint64_t, 1024> revenuePerShare;
-Array<unsigned int, 65536> burntQcapAmPerEpoch;
-unsigned int totalVotingPower, totalStakedQcapAmount, qcapSoldAmount;
-unsigned int shareholderDividend, QCAPHolderPermille, reinvestingPermille, devPermille, burnPermille, qcapBurnPermille, totalQcapBurntAmount;
-unsigned int numberOfStaker, numberOfVotingPower;
-unsigned int numberOfGP;
-unsigned int numberOfQCP;
-unsigned int numberOfIPOP;
-unsigned int numberOfQEarnP;
-unsigned int numberOfFundP;
-unsigned int numberOfMKTP;
-unsigned int numberOfAlloP;
-unsigned int transferRightsFee;
-unsigned int quorumPercent;
+Array<uint32_t, 65536> burntQcapAmPerEpoch;
+uint32_t totalVotingPower, totalStakedQcapAmount, qcapSoldAmount;
+uint32_t shareholderDividend, QCAPHolderPermille, reinvestingPermille, burnPermille, qcapBurnPermille, totalQcapBurntAmount;
+uint32_t numberOfStaker, numberOfVotingPower;
+uint32_t numberOfGP;
+uint32_t numberOfQCP;
+uint32_t numberOfIPOP;
+uint32_t numberOfQEarnP;
+uint32_t numberOfFundP;
+uint32_t numberOfMKTP;
+uint32_t numberOfAlloP;
+uint32_t transferRightsFee;
+uint32_t quorumPercent;
 
 // Function to write new state to a file
 void writeNewState(const std::string& filename) {
@@ -951,11 +957,9 @@ void writeNewState(const std::string& filename) {
     }
 
     QCAP_ISSUER = ID(_Q, _C, _A, _P, _W, _M, _Y, _R, _S, _H, _L, _B, _J, _H, _S, _T, _T, _Z, _Q, _V, _C, _I, _B, _A, _R, _V, _O, _A, _S, _K, _D, _E, _N, _A, _S, _A, _K, _N, _O, _B, _R, _G, _P, _F, _W, _W, _K, _R, _C, _U, _V, _U, _A, _X, _Y, _E);
-    adminAddress = ID(_H, _E, _C, _G, _U, _G, _H, _C, _J, _K, _Q, _O, _S, _D, _T, _M, _E, _H, _Q, _Y, _W, _D, _D, _T, _L, _F, _D, _A, _S, _Z, _K, _M, _G, _J, _L, _S, _R, _C, _S, _T, _H, _H, _A, _P, _P, _E, _D, _L, _G, _B, _L, _X, _J, _M, _N, _D);
     qcapSoldAmount = 1909423;
     transferRightsFee = 100;
     quorumPercent = 670;
-    devPermille = 20;
     qcapBurnPermille = 0;
     burnPermille = 0;
     QCAPHolderPermille = 500;
@@ -972,7 +976,6 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&MKTP), sizeof(MKTP));
     outfile.write(reinterpret_cast<const char*>(&AlloP), sizeof(AlloP));
     outfile.write(reinterpret_cast<const char*>(&QCAP_ISSUER), sizeof(QCAP_ISSUER));
-    outfile.write(reinterpret_cast<const char*>(&adminAddress), sizeof(adminAddress));
     outfile.write(reinterpret_cast<const char*>(&vote), sizeof(vote));
     outfile.write(reinterpret_cast<const char*>(&countOfVote), sizeof(countOfVote));
     outfile.write(reinterpret_cast<const char*>(&proposalCreateFund), sizeof(proposalCreateFund));
@@ -995,7 +998,6 @@ void writeNewState(const std::string& filename) {
     outfile.write(reinterpret_cast<const char*>(&shareholderDividend), sizeof(shareholderDividend));
     outfile.write(reinterpret_cast<const char*>(&QCAPHolderPermille), sizeof(QCAPHolderPermille));
     outfile.write(reinterpret_cast<const char*>(&reinvestingPermille), sizeof(reinvestingPermille));
-    outfile.write(reinterpret_cast<const char*>(&devPermille), sizeof(devPermille));
     outfile.write(reinterpret_cast<const char*>(&burnPermille), sizeof(burnPermille));
     outfile.write(reinterpret_cast<const char*>(&qcapBurnPermille), sizeof(qcapBurnPermille));
     outfile.write(reinterpret_cast<const char*>(&totalQcapBurntAmount), sizeof(totalQcapBurntAmount));
@@ -1020,7 +1022,7 @@ void writeNewState(const std::string& filename) {
 int main() {
     try {
         // File paths
-        const std::string newStateFile = "contract0010.164";
+        const std::string newStateFile = "contract0010.188";
 
         // Write the new state to a file
         writeNewState(newStateFile);
