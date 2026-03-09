@@ -35,6 +35,15 @@
 #define ID(_00, _01, _02, _03, _04, _05, _06, _07, _08, _09, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55) _mm256_set_epi64x(((((((((((((((uint64_t)_55) * 26 + _54) * 26 + _53) * 26 + _52) * 26 + _51) * 26 + _50) * 26 + _49) * 26 + _48) * 26 + _47) * 26 + _46) * 26 + _45) * 26 + _44) * 26 + _43) * 26 + _42, ((((((((((((((uint64_t)_41) * 26 + _40) * 26 + _39) * 26 + _38) * 26 + _37) * 26 + _36) * 26 + _35) * 26 + _34) * 26 + _33) * 26 + _32) * 26 + _31) * 26 + _30) * 26 + _29) * 26 + _28, ((((((((((((((uint64_t)_27) * 26 + _26) * 26 + _25) * 26 + _24) * 26 + _23) * 26 + _22) * 26 + _21) * 26 + _20) * 26 + _19) * 26 + _18) * 26 + _17) * 26 + _16) * 26 + _15) * 26 + _14, ((((((((((((((uint64_t)_13) * 26 + _12) * 26 + _11) * 26 + _10) * 26 + _09) * 26 + _08) * 26 + _07) * 26 + _06) * 26 + _05) * 26 + _04) * 26 + _03) * 26 + _02) * 26 + _01) * 26 + _00)
 
 typedef m256i id;
+typedef signed char sint8;
+typedef unsigned char uint8;
+typedef signed short sint16;
+typedef unsigned short uint16;
+typedef signed int sint32;
+typedef unsigned int uint32;
+typedef signed long long sint64;
+typedef unsigned long long uint64;
+
 constexpr unsigned int QVAULT_MAX_NUMBER_OF_PROPOSAL = 65536;
 constexpr uint64_t QVAULT_X_MULTIPLIER = 1048576;  // 2^20
 constexpr uint64_t QVAULT_MAX_URLS_COUNT = 256;
@@ -792,162 +801,214 @@ void HashSet<KeyT, L, HashFunc>::reset()
     setMem(this, sizeof(*this), 0);
 }
 
-
+/**
+* Staking information structure
+* Tracks individual staker addresses and their staked amounts
+*/
 struct stakingInfo
 {
-    id stakerAddress;
-    uint32_t amount;
+    id stakerAddress;    // Address of the staker
+    uint32 amount;       // Amount of QCAP tokens staked
 };
-
-Array<stakingInfo, QVAULT_X_MULTIPLIER> staker;
-Array<stakingInfo, QVAULT_X_MULTIPLIER> votingPower;
-
-struct GPInfo                   // General proposal
+/**
+* General Proposal (GP) information structure
+* Stores details about general governance proposals
+*/
+struct GPInfo
 {
-    id proposer;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t proposedEpoch;
-    uint32_t currentQuorumPercent;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
+    id proposer;                    // Address of the proposal creator
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 currentQuorumPercent;    // Quorum percentage when proposal was created
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum
 };
-
-Array<GPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> GP;
-
-struct QCPInfo                   // Quorum change proposal
+/**
+* Quorum Change Proposal (QCP) information structure
+* Stores details about proposals to change the voting quorum percentage
+*/
+struct QCPInfo
 {
-    id proposer;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t proposedEpoch;
-    uint32_t currentQuorumPercent;
-    uint32_t newQuorumPercent;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
+    id proposer;                    // Address of the proposal creator
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 currentQuorumPercent;    // Current quorum percentage
+    uint32 newQuorumPercent;        // Proposed new quorum percentage
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum
 };
-
-Array<QCPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> QCP;
-
-struct IPOPInfo         // IPO participation
+/**
+* IPO Participation Proposal (IPOP) information structure
+* Stores details about proposals to participate in IPO contracts
+*/
+struct IPOPInfo
 {
-    id proposer;
-    uint64_t totalWeight;
-    uint64_t assignedFund;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t proposedEpoch;
-    uint32_t ipoContractIndex;
-    uint32_t currentQuorumPercent;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient invest funds.
+    id proposer;                    // Address of the proposal creator
+    uint64 totalWeight;             // Total weighted voting power for IPO participation
+    uint64 assignedFund;            // Amount of funds assigned for IPO participation
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 ipoContractIndex;        // Index of the IPO contract to participate in
+    uint32 currentQuorumPercent;    // Current quorum percentage
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum, 3=insufficient funds
 };
-
-Array<IPOPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> IPOP;
-
-struct QEarnPInfo       // Qearn participation proposal
+/**
+* QEarn Participation Proposal (QEarnP) information structure
+* Stores details about proposals to participate in QEarn contracts
+*/
+struct QEarnPInfo
 {
-    id proposer;
-    uint64_t amountOfInvestPerEpoch;
-    uint64_t assignedFundPerEpoch;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t proposedEpoch;
-    uint32_t currentQuorumPercent;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t numberOfEpoch;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds.
+    id proposer;                    // Address of the proposal creator
+    uint64 amountOfInvestPerEpoch; // Amount to invest per epoch
+    uint64 assignedFundPerEpoch;    // Amount of funds assigned per epoch
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 currentQuorumPercent;    // Current quorum percentage
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 numberOfEpoch;            // Number of epochs to participate
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum, 3=insufficient funds
 };
-
-Array<QEarnPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> QEarnP;
-
-struct FundPInfo            // Fundraising proposal
+/**
+* Fundraising Proposal (FundP) information structure
+* Stores details about proposals to sell QCAP tokens for fundraising
+*/
+struct FundPInfo
 {
-    id proposer;
-    uint64_t pricePerOneQcap;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t amountOfQcap;
-    uint32_t restSaleAmount;
-    uint32_t proposedEpoch;
-    uint32_t currentQuorumPercent;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
+    id proposer;                    // Address of the proposal creator
+    uint64 pricePerOneQcap;         // Price per QCAP token in qubic
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 amountOfQcap;            // Total amount of QCAP tokens to sell
+    uint32 restSaleAmount;          // Remaining amount of QCAP tokens available for sale
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 currentQuorumPercent;    // Current quorum percentage
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum
 };
-
-Array<FundPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> FundP;
-
-struct MKTPInfo                 //  Marketplace proposal
+/**
+* Marketplace Proposal (MKTP) information structure
+* Stores details about proposals to purchase shares from the marketplace
+*/
+struct MKTPInfo
 {
-    id proposer;
-    uint64_t amountOfQubic;
-    uint64_t shareName;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t amountOfQcap;
-    uint32_t currentQuorumPercent;
-    uint32_t proposedEpoch;
-    uint32_t shareIndex;
-    uint32_t amountOfShare;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum. 3 is the insufficient funds. 4 is the insufficient Qcap.
+    id proposer;                    // Address of the proposal creator
+    uint64 amountOfQubic;           // Amount of qubic to spend on shares
+    uint64 shareName;               // Name/identifier of the share to purchase
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 amountOfQcap;            // Amount of QCAP tokens to offer
+    uint32 currentQuorumPercent;    // Current quorum percentage
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 shareIndex;              // Index of the share in the marketplace
+    uint32 amountOfShare;           // Amount of shares to purchase
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum, 3=insufficient funds, 4=insufficient QCAP
 };
-
-Array<MKTPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> MKTP;
-
+/**
+* Allocation Proposal (AlloP) information structure
+* Stores details about proposals to change revenue allocation percentages
+* All percentages are in per mille (parts per thousand)
+*/
 struct AlloPInfo
 {
-    id proposer;
-    uint32_t currentTotalVotingPower;
-    uint32_t numberOfYes;
-    uint32_t numberOfNo;
-    uint32_t proposedEpoch;
-    uint32_t currentQuorumPercent;
-    uint32_t reinvested;
-    uint32_t distributed;
-    uint32_t burnQcap;
-    Array<uint8_t, QVAULT_MAX_URLS_COUNT> url;
-    uint8_t result;  // 0 is the passed proposal, 1 is the rejected proposal. 2 is the insufficient quorum.
+    id proposer;                    // Address of the proposal creator
+    uint32 currentTotalVotingPower; // Total voting power when proposal was created
+    uint32 numberOfYes;             // Number of yes votes received
+    uint32 numberOfNo;              // Number of no votes received
+    uint32 proposedEpoch;           // Epoch when proposal was created
+    uint32 currentQuorumPercent;    // Current quorum percentage
+    uint32 reinvested;              // Percentage for reinvestment (per mille)
+    uint32 distributed;             // Percentage for distribution (per mille)
+    uint32 burnQcap;                // Percentage for QCAP burning (per mille)
+    Array<uint8, QVAULT_MAX_URLS_COUNT> url;          // URL containing proposal details
+    uint8 result;                   // Proposal result: 0=passed, 1=rejected, 2=insufficient quorum
 };
-
-Array<AlloPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> AlloP;
-
-id QCAP_ISSUER;
-
+/**
+* Vote status information structure
+* Tracks individual user votes on proposals
+*/
 struct voteStatusInfo
 {
-    uint32_t proposalId;
-    uint8_t proposalType;
-    bit decision;
+    uint64 priceOfIPO;              // IPO price for IPO participation proposals
+    uint32 proposalId;              // ID of the proposal voted on
+    uint8 proposalType;             // Type of proposal (1-7)
+    bit decision;                   // Voting decision (1=yes, 0=no)
 };
-HashMap<id, Array<voteStatusInfo, QVAULT_MAX_USER_VOTES>, QVAULT_X_MULTIPLIER> vote;
-HashMap<id, uint8_t, QVAULT_X_MULTIPLIER> countOfVote;
 
-uint64_t proposalCreateFund, reinvestingFund, totalEpochRevenue, fundForBurn, totalHistoryRevenue, rasiedFundByQcap, lastRoundPriceOfQcap, revenueByQearn;
-Array<uint64_t, 65536> revenueInQcapPerEpoch;
-Array<uint64_t, 65536> revenueForOneQcapPerEpoch;
-Array<uint64_t, 65536> revenueForOneQvaultPerEpoch;
-Array<uint64_t, 65536> revenueForReinvestPerEpoch;
-Array<uint64_t, 1024> revenuePerShare;
-Array<uint32_t, 65536> burntQcapAmPerEpoch;
-uint32_t totalVotingPower, totalStakedQcapAmount, qcapSoldAmount;
-uint32_t shareholderDividend, QCAPHolderPermille, reinvestingPermille, burnPermille, qcapBurnPermille, totalQcapBurntAmount;
-uint32_t numberOfStaker, numberOfVotingPower;
-uint32_t numberOfGP;
-uint32_t numberOfQCP;
-uint32_t numberOfIPOP;
-uint32_t numberOfQEarnP;
-uint32_t numberOfFundP;
-uint32_t numberOfMKTP;
-uint32_t numberOfAlloP;
-uint32_t transferRightsFee;
-uint32_t quorumPercent;
+// Storage arrays for staking and voting power data
+Array<stakingInfo, QVAULT_X_MULTIPLIER> staker;      // Array of all stakers (max 1M stakers)
+Array<stakingInfo, QVAULT_X_MULTIPLIER> votingPower; // Array of users with voting power
+// Storage array for general proposals
+Array<GPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> GP;
+// Storage array for quorum change proposals
+Array<QCPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> QCP;
+// Storage array for IPO participation proposals
+Array<IPOPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> IPOP;
+// Storage array for QEarn participation proposals
+Array<QEarnPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> QEarnP;
+// Storage array for fundraising proposals
+Array<FundPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> FundP;
+// Storage array for marketplace proposals
+Array<MKTPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> MKTP;
+// Storage array for allocation proposals
+Array<AlloPInfo, QVAULT_MAX_NUMBER_OF_PROPOSAL> AlloP;
+// Contract configuration and administration
+id QCAP_ISSUER;                    // Address that can issue QCAP tokens
+// Storage for user voting history and vote counts
+HashMap<id, Array<voteStatusInfo, QVAULT_MAX_USER_VOTES>, QVAULT_X_MULTIPLIER> vote;        // User voting history (max 16 votes per user)
+HashMap<id, uint8, QVAULT_X_MULTIPLIER> countOfVote;                      // Count of votes per user
+// Financial state variables
+uint64 proposalCreateFund;          // Fund accumulated from proposal fees
+uint64 reinvestingFund;             // Fund available for reinvestment
+uint64 totalEpochRevenue;           // Total revenue for current epoch
+uint64 fundForBurn;                 // Fund allocated for token burning
+uint64 totalHistoryRevenue;         // Total historical revenue
+uint64 rasiedFundByQcap;            // Total funds raised from QCAP sales
+uint64 lastRoundPriceOfQcap;        // QCAP price from last fundraising round
+uint64 revenueByQearn;              // Revenue generated from QEarn operations
+// Per-epoch revenue tracking arrays
+Array<uint64, 65536> revenueInQcapPerEpoch;        // Revenue in QCAP per epoch
+Array<uint64, 65536> revenueForOneQcapPerEpoch;    // Revenue per QCAP token per epoch
+Array<uint64, 65536> revenueForOneQvaultPerEpoch;  // Revenue per QVAULT share per epoch
+Array<uint64, 65536> revenueForReinvestPerEpoch;   // Revenue for reinvestment per epoch
+Array<uint64, 1024> revenuePerShare;               // Revenue per share per epoch
+Array<uint32, 65536> burntQcapAmPerEpoch;          // QCAP amount burned per epoch
+// Staking and voting state
+uint32 totalVotingPower;            // Total voting power across all stakers
+uint32 totalStakedQcapAmount;       // Total amount of QCAP tokens staked
+uint32 qcapSoldAmount;              // Total QCAP tokens sold to date
+// Revenue allocation percentages (per mille)
+uint32 shareholderDividend;         // Dividend percentage for shareholders
+uint32 QCAPHolderPermille;          // Revenue allocation for QCAP holders
+uint32 reinvestingPermille;         // Revenue allocation for reinvestment
+uint32 burnPermille;                // Revenue allocation for burning
+uint32 qcapBurnPermille;            // Revenue allocation for QCAP burning
+uint32 totalQcapBurntAmount;        // Total QCAP tokens burned to date
+// Counters for stakers and voting power
+uint32 numberOfStaker;              // Number of active stakers
+uint32 numberOfVotingPower;         // Number of users with voting power
+// Proposal counters for each type
+uint32 numberOfGP;                  // Number of General Proposals
+uint32 numberOfQCP;                 // Number of Quorum Change Proposals
+uint32 numberOfIPOP;                // Number of IPO Participation Proposals
+uint32 numberOfQEarnP;              // Number of QEarn Participation Proposals
+uint32 numberOfFundP;               // Number of Fundraising Proposals
+uint32 numberOfMKTP;                // Number of Marketplace Proposals
+uint32 numberOfAlloP;               // Number of Allocation Proposals
+// Configuration parameters
+uint32 transferRightsFee;           // Fee for transferring share management rights
+uint32 quorumPercent;               // Current quorum percentage for proposals 
 
 // Function to write new state to a file
 void writeNewState(const std::string& filename) {
@@ -957,13 +1018,12 @@ void writeNewState(const std::string& filename) {
     }
 
     QCAP_ISSUER = ID(_Q, _C, _A, _P, _W, _M, _Y, _R, _S, _H, _L, _B, _J, _H, _S, _T, _T, _Z, _Q, _V, _C, _I, _B, _A, _R, _V, _O, _A, _S, _K, _D, _E, _N, _A, _S, _A, _K, _N, _O, _B, _R, _G, _P, _F, _W, _W, _K, _R, _C, _U, _V, _U, _A, _X, _Y, _E);
-    qcapSoldAmount = 1909423;
+    qcapSoldAmount = 3230507;
     transferRightsFee = 100;
     quorumPercent = 670;
     qcapBurnPermille = 0;
     burnPermille = 0;
-    QCAPHolderPermille = 520;
-    reinvestingPermille = 450;
+    QCAPHolderPermille = 970;
     shareholderDividend = 30;
 
     outfile.write(reinterpret_cast<const char*>(&staker), sizeof(staker));
@@ -1022,7 +1082,7 @@ void writeNewState(const std::string& filename) {
 int main() {
     try {
         // File paths
-        const std::string newStateFile = "contract0010.188";
+        const std::string newStateFile = "contract0010.204";
 
         // Write the new state to a file
         writeNewState(newStateFile);
