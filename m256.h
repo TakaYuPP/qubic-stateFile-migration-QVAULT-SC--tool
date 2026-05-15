@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+#include <immintrin.h>
 #include <intrin.h>
 
 // Used for all kinds of IDs, including in QPI and contracts.
@@ -7,66 +9,79 @@
 union m256i
 {
     // access for loops and compatibility with __m256i
-    __int8              m256i_i8[32];
-    __int16             m256i_i16[16];
-    __int32             m256i_i32[8];
-    __int64             m256i_i64[4];
-    unsigned __int8     m256i_u8[32];
-    unsigned __int16    m256i_u16[16];
-    unsigned __int32    m256i_u32[8];
-    unsigned __int64    m256i_u64[4];
+    int8_t              m256i_i8[32];
+    int16_t             m256i_i16[16];
+    int32_t             m256i_i32[8];
+    int64_t             m256i_i64[4];
+    uint8_t     m256i_u8[32];
+    uint16_t    m256i_u16[16];
+    uint32_t    m256i_u32[8];
+    uint64_t    m256i_u64[4];
 
     // interface for QPI (no [] allowed)
     struct
     {
-        unsigned __int64 _0, _1, _2, _3;
+        uint64_t _0, _1, _2, _3;
     } u64;
     struct
     {
-        __int64 _0, _1, _2, _3;
+        int64_t _0, _1, _2, _3;
     } i64;
     struct
     {
-        unsigned __int32 _0, _1, _2, _3, _4, _5, _6, _7;
+        uint32_t _0, _1, _2, _3, _4, _5, _6, _7;
     } u32;
     struct
     {
-        __int32 _0, _1, _2, _3, _4, _5, _6, _7;
+        int32_t _0, _1, _2, _3, _4, _5, _6, _7;
     } i32;
     struct
     {
-        unsigned __int16 _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+        uint16_t _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     } u16;
     struct
     {
-        __int16 _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+        int16_t _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     } i16;
     struct
     {
-        unsigned __int8 _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-        unsigned __int8 _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+        uint8_t _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+        uint8_t _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
     } u8;
     struct
     {
-        __int8 _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-        __int8 _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+        int8_t _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+        int8_t _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
     } i8;
 
     m256i() = default;
 
     m256i(unsigned long long ull0, unsigned long long ull1, unsigned long long ull2, unsigned long long ull3)
     {
-        m256i_intr() = _mm256_set_epi64x(ull3, ull2, ull1, ull0);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(this),
+                             _mm256_set_epi64x(ull3, ull2, ull1, ull0));
+    }
+
+    m256i(
+        char c0, char c1, char c2, char c3, char c4, char c5 = 0, char c6 = 0, char c7 = 0, char c8 = 0, char c9 = 0,
+        char c10 = 0, char c11 = 0, char c12 = 0, char c13 = 0, char c14 = 0, char c15 = 0, char c16 = 0, char c17 = 0,
+        char c18 = 0, char c19 = 0, char c20 = 0, char c21 = 0, char c22 = 0, char c23 = 0, char c24 = 0, char c25 = 0,
+        char c26 = 0, char c27 = 0, char c28 = 0, char c29 = 0, char c30 = 0, char c31 = 0)
+    {
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(this),
+            _mm256_set_epi8(c31, c30, c29, c28, c27, c26, c25, c24, c23, c22, c21, c20, c19, c18, c17, c16, c15, c14, c13, c12,
+                c11, c10, c9, c8, c7, c6, c5, c4, c3, c2, c1, c0));
     }
 
     m256i(const unsigned char value[32])
     {
-        assign(*(m256i*)value);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(this),
+                              _mm256_loadu_si256(reinterpret_cast<const __m256i*>(value)));
     }
 
     m256i(const __m256i& value)
     {
-        assign(*(m256i*)&value);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(this), value);
     }
 
     m256i(const m256i& value)
@@ -117,43 +132,63 @@ union m256i
     void assign(const m256i& value) noexcept
     {
         // supports self-assignment
-        _mm256_storeu_si256((__m256i*)this, _mm256_lddqu_si256((const __m256i*) & value));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(this),
+                        _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(&value)));
     }
 
-    volatile void assign(const m256i& value) volatile noexcept
+    void assign(const m256i& value) volatile noexcept
     {
-        // supports self-assignment
-        _mm256_storeu_si256((__m256i*)this, _mm256_lddqu_si256((const __m256i*) & value));
+        _mm256_storeu_si256(
+            reinterpret_cast<__m256i*>(const_cast<m256i*>(this)), // Cast away volatile from 'this'
+            _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(&value))
+        );
     }
 
     void assign(const volatile m256i& value) noexcept
     {
         // supports self-assignment
-        _mm256_storeu_si256((__m256i*)this, _mm256_lddqu_si256((const __m256i*) & value));
+        _mm256_storeu_si256(
+            reinterpret_cast<__m256i*>(this),
+            _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(const_cast<const m256i*>(&value))) // Cast away volatile from 'value'
+        );
     }
 
-    volatile void assign(volatile const m256i& value) volatile noexcept
+    void assign(volatile const m256i& value) volatile noexcept
     {
         // supports self-assignment
-        _mm256_storeu_si256((__m256i*)this, _mm256_lddqu_si256((const __m256i*) & value));
+        _mm256_storeu_si256(
+            reinterpret_cast<__m256i*>(const_cast<m256i*>(this)), // Cast away volatile from 'this'
+            _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(const_cast<const m256i*>(&value))) // Cast away volatile from 'value'
+        );
     }
 
-    __m256i& m256i_intr()
+    // Safely retrieves the content of the m256i union as an __m256i value.
+    __m256i getIntrinsicValue() const noexcept
     {
-        return *(__m256i*) this;
+        return _mm256_loadu_si256(reinterpret_cast<const __m256i*>(this));
     }
 
-    const __m256i& m256i_intr() const
+    __m256i getIntrinsicValue() const volatile noexcept 
     {
-        return *(const __m256i*) this;
+        return _mm256_loadu_si256(
+            reinterpret_cast<const __m256i*>( // Step 2: Reinterpret type
+                const_cast<const m256i*>(this)   // Step 1: Cast away volatile
+            )
+        );
+    }
+
+    // Safely sets the content of the m256i union from an __m256i value.
+    void setIntrinsicValue(const __m256i& newValue) noexcept
+    {
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(this), newValue);
     }
 
     void setRandomValue()
     {
-        _rdrand64_step(&m256i_u64[0]);
-        _rdrand64_step(&m256i_u64[1]);
-        _rdrand64_step(&m256i_u64[2]);
-        _rdrand64_step(&m256i_u64[3]);
+        _rdrand64_step(reinterpret_cast<unsigned long long*>(&m256i_u64[0]));
+        _rdrand64_step(reinterpret_cast<unsigned long long*>(&m256i_u64[1]));
+        _rdrand64_step(reinterpret_cast<unsigned long long*>(&m256i_u64[2]));
+        _rdrand64_step(reinterpret_cast<unsigned long long*>(&m256i_u64[3]));
     }
 
     static m256i randomValue()
@@ -177,19 +212,20 @@ static inline const __m256i& __m256i_convert(const __m256i& a)
     return a;
 }
 
-static inline const __m256i& __m256i_convert(const m256i& a)
+static inline __m256i __m256i_convert(const m256i& a)
 {
-    return *((__m256i*) & a);
+    return a.getIntrinsicValue();
 }
 
-static inline const __m256i& __m256i_convert(volatile const m256i& a)
+static inline __m256i __m256i_convert(volatile const m256i& a)
 {
-    return *((__m256i*) & a);
+
+    return a.getIntrinsicValue();
 }
 
-static inline const __m256i& __m256i_convert(const unsigned char a[32])
+static inline __m256i __m256i_convert(const unsigned char a[32])
 {
-    return *((__m256i*)a);
+    return _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a));
 }
 
 /*
@@ -204,55 +240,55 @@ static inline bool EQUAL(const __m256i& a, const __m256i& b)
 template <typename TA, typename TB>
 static inline bool operator==(const TA& a, const TB& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == 0xFFFFFFFF;
+    return static_cast<uint64_t>_mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == 0xFFFFFFFF;
 }
 
 template <typename TA, typename TB>
 static inline bool operator!=(const TA& a, const TB& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != 0xFFFFFFFF;
+    return static_cast<uint64_t>_mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != 0xFFFFFFFF;
 }
 
 #else
 
 static inline bool operator==(const m256i& a, const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == (int)0xFFFFFFFFU;
 }
 
 static inline bool operator!=(const m256i& a, const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != (int)0xFFFFFFFFU;
 }
 
 static inline bool operator==(const m256i& a, volatile const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == (int)0xFFFFFFFFU;
 }
 
 static inline bool operator!=(const m256i& a, volatile const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != (int)0xFFFFFFFFU;
 }
 
 static inline bool operator==(volatile const m256i& a, const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == (int)0xFFFFFFFFU;
 }
 
 static inline bool operator!=(volatile const m256i& a, const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != (int)0xFFFFFFFFU;
 }
 
 static inline bool operator==(volatile const m256i& a, volatile const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) == (int)0xFFFFFFFFU;
 }
 
 static inline bool operator!=(volatile const m256i& a, volatile const m256i& b)
 {
-    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != 0xFFFFFFFF;
+    return _mm256_movemask_epi8(_mm256_cmpeq_epi64(__m256i_convert(a), __m256i_convert(b))) != (int)0xFFFFFFFFU;
 }
 #endif
 
