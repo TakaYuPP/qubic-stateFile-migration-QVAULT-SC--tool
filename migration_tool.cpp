@@ -1425,12 +1425,35 @@ constexpr sint64 QSWAP_MIN_LIQUIDITY = 1000;
 constexpr uint32 QSWAP_SWAP_FEE_BASE = 10000;
 constexpr uint32 QSWAP_FEE_BASE_100 = 100;
 
+struct uint128
+{
+    uint64 low = 0;
+    uint64 high = 0;
+};
+
+// On-disk layout before migration (no LP fee accumulator on pools).
+struct OldPoolBasicState
+{
+    id poolID;
+    sint64 reservedQuAmount;
+    sint64 reservedAssetAmount;
+    sint64 totalLiquidity;
+};
+
 struct PoolBasicState
 {
     id poolID;
     sint64 reservedQuAmount;
     sint64 reservedAssetAmount;
     sint64 totalLiquidity;
+    uint128 accFeePerLPX64;
+};
+
+struct LiquidityInfo
+{
+    sint64 liquidity;
+    uint128 feeDebtX64;
+    uint64 accumulatedFee;
 };
 
 // Old QSWAP stored entity + liquidity per Collection element (PoV = poolID).
@@ -1453,7 +1476,7 @@ uint64 old_investRewardsDistributedAmount;
 uint64 old_shareholderEarnedFee;
 uint64 old_shareholderDistributedAmount;
 
-Array<PoolBasicState, QSWAP_OLD_MAX_POOL> old_mPoolBasicStates;
+Array<OldPoolBasicState, QSWAP_OLD_MAX_POOL> old_mPoolBasicStates;
 Collection<OldLiquidityInfo, QSWAP_OLD_MAX_POOL * QSWAP_MAX_USER_PER_POOL> old_mLiquidities;
 
 uint32 old_qxFeeRate;             // 5: 5% of swap fees to QX (base: 100)
@@ -1470,7 +1493,7 @@ uint32 old_cachedTransferFee;
 
 // Migrated state (file scope: Collection is hundreds of MB — must not live on the stack).
 Array<PoolBasicState, QSWAP_NEW_MAX_POOL> new_mPoolBasicStates;
-Collection<sint64, QSWAP_NEW_MAX_POOL * QSWAP_MAX_USER_PER_POOL> new_mLiquidities;
+Collection<LiquidityInfo, QSWAP_NEW_MAX_POOL * QSWAP_MAX_USER_PER_POOL> new_mLiquidities;
 
 // Binary state I/O (field order must match QSWAP::StateData on disk).
 #define READ_STATE(stream, value) \
@@ -1609,7 +1632,7 @@ static void exportOldStateToCsv(const std::string& oldStateFile)
         out << "pool_slot,pool_id,reserved_qu_amount,reserved_asset_amount,total_liquidity,active\n";
         for (uint64 slot = 0; slot < QSWAP_OLD_MAX_POOL; ++slot)
         {
-            const PoolBasicState& pool = old_mPoolBasicStates.get(slot);
+            const OldPoolBasicState& pool = old_mPoolBasicStates.get(slot);
             const bool active = !isZeroId(pool.poolID);
             out << slot << ',';
             writeCsvEscaped(out, test_utils::idToIdentity(pool.poolID));
@@ -1628,7 +1651,7 @@ static void exportOldStateToCsv(const std::string& oldStateFile)
         out << "pool_slot,pool_id,entity_id,liquidity\n";
         for (uint64 slot = 0; slot < QSWAP_OLD_MAX_POOL; ++slot)
         {
-            const PoolBasicState& pool = old_mPoolBasicStates.get(slot);
+            const OldPoolBasicState& pool = old_mPoolBasicStates.get(slot);
             if (isZeroId(pool.poolID))
             {
                 continue;
@@ -1670,15 +1693,15 @@ inline id liquidityPov(const id& poolID, const id& entity, id& r)
     return r;
 }
 
-// Rebuild mLiquidities: old PoV = poolID with {entity, liquidity}; new PoV = poolID ^ entity, value = liquidity only.
+// Rebuild mLiquidities: old PoV = poolID with {entity, liquidity}; new PoV = poolID ^ entity, LiquidityInfo per LP.
 static void migrateLiquidities(
-    Collection<sint64, QSWAP_NEW_MAX_POOL * QSWAP_MAX_USER_PER_POOL>& new_mLiquidities)
+    Collection<LiquidityInfo, QSWAP_NEW_MAX_POOL * QSWAP_MAX_USER_PER_POOL>& new_mLiquidities)
 {
     new_mLiquidities.reset();
 
     for (uint64 poolSlot = 0; poolSlot < QSWAP_NEW_MAX_POOL; ++poolSlot)
     {
-        const PoolBasicState& pool = old_mPoolBasicStates.get(poolSlot);
+        const OldPoolBasicState& pool = old_mPoolBasicStates.get(poolSlot);
         if (isZeroId(pool.poolID))
         {
             continue;
@@ -1695,8 +1718,13 @@ static void migrateLiquidities(
                 id povScratch;
                 const id newPov = liquidityPov(poolID, oldEntry.entity, povScratch);
 
+                LiquidityInfo newEntry;
+                newEntry.liquidity = oldEntry.liquidity;
+                newEntry.feeDebtX64 = uint128();
+                newEntry.accumulatedFee = 0;
+
                 // Priority is unused when each PoV has a single element (same as live QSWAP: add(..., 0)).
-                if (new_mLiquidities.add(newPov, oldEntry.liquidity, 0) == NULL_INDEX)
+                if (new_mLiquidities.add(newPov, newEntry, 0) == NULL_INDEX)
                 {
                     throw std::runtime_error(
                         "Failed to migrate liquidity: new collection is full "
@@ -1714,7 +1742,14 @@ void writeNewState(const std::string& filename)
 {
     for (uint64 i = 0; i < QSWAP_NEW_MAX_POOL; ++i)
     {
-        new_mPoolBasicStates.set(i, old_mPoolBasicStates.get(i));
+        const OldPoolBasicState& oldPool = old_mPoolBasicStates.get(i);
+        PoolBasicState newPool;
+        newPool.poolID = oldPool.poolID;
+        newPool.reservedQuAmount = oldPool.reservedQuAmount;
+        newPool.reservedAssetAmount = oldPool.reservedAssetAmount;
+        newPool.totalLiquidity = oldPool.totalLiquidity;
+        newPool.accFeePerLPX64 = uint128();
+        new_mPoolBasicStates.set(i, newPool);
     }
 
     std::cout << "Migrating liquidities..." << std::endl;
