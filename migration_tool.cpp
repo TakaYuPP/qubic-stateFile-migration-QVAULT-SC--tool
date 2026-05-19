@@ -1797,7 +1797,7 @@ int main()
 {
     try
     {
-        const std::string oldStateFile = "contract0013.214";
+        const std::string oldStateFile = "contract0013.215";
         const std::string newStateFile = "contract0013.215.new";
 
         std::cout << "Reading " << oldStateFile << "..." << std::endl;
