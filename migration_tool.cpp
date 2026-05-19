@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <vector>
 #include <immintrin.h>
-#include <intrin.h>
 #include "./m256.h"
 #include "./test_utils.h"
 
@@ -1799,7 +1798,7 @@ int main()
     try
     {
         const std::string oldStateFile = "contract0013.214";
-        const std::string newStateFile = "contract0013.215";
+        const std::string newStateFile = "contract0013.215.new";
 
         std::cout << "Reading " << oldStateFile << "..." << std::endl;
         std::cout.flush();

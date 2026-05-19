@@ -19,3 +19,8 @@ add_executable(qubic-stateFile-migration-tool ${SOURCES} ${HEADERS})
 target_include_directories(qubic-stateFile-migration-tool PRIVATE
 	${CMAKE_SOURCE_DIR}
 )
+
+
+if (NOT MSVC)
+       target_compile_options(qubic-stateFile-migration-tool PRIVATE -mavx2 -mbmi -mlzcnt)
+endif()
